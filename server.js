@@ -30,7 +30,7 @@ const GEMINI_KEYS = [
   process.env.GEMINI_API_KEY2,
 ].filter(Boolean);
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -58,14 +58,24 @@ app.post('/api/analyze', async (req, res) => {
   const secs = timeSpent % 60;
   const timeStr = minutes > 0 ? `${minutes} minutes and ${secs} seconds` : `${secs} seconds`;
 
-  const prompt = `Analyze this image of collected plastic waste.
+  const prompt = `You are an expert environmental waste analyst. Analyze this image of collected plastic/trash waste very carefully.
 
 Return a JSON object with these exact fields:
-1. "types": array of plastic/trash item types found (e.g. ["bottle", "wrapper", "bag"])
-2. "count": estimated total number of plastic items visible
-3. "weight_kg": approximate total weight in kg (use a reasonable estimate)
-4. "impact": a 2-3 sentence description of the positive environmental impact of collecting this waste. Include an estimate of pollution reduced.
-5. "time_context": a motivational sentence about how collecting this amount in ${timeStr} is impressive and the difference it makes today
+1. "types": array of specific plastic/trash item types found (e.g. ["PET bottle", "HDPE container", "plastic bag", "food wrapper", "styrofoam cup"])
+2. "count": estimated total number of individual plastic/trash items visible in the image. Count carefully.
+3. "weight_kg": estimated total weight in kilograms. Use these reference weights for accuracy:
+   - Empty PET bottle (500ml): ~0.025 kg
+   - Empty PET bottle (1L): ~0.035 kg
+   - Plastic bag: ~0.008 kg
+   - Food wrapper/packet: ~0.005 kg
+   - Styrofoam cup: ~0.005 kg
+   - Plastic container/tub: ~0.03 kg
+   - Plastic straw: ~0.002 kg
+   - Bottle cap: ~0.003 kg
+   - HDPE bottle (detergent etc): ~0.06 kg
+   Calculate the total weight by summing up the estimated weight of each individual item you see. Round to 3 decimal places.
+4. "impact": a 2-3 sentence description of the positive environmental impact of collecting this waste. Include specific facts about ocean pollution or wildlife protection.
+5. "time_context": a motivational sentence about how collecting this amount in ${timeStr} is impressive and the tangible difference it makes
 
 Respond ONLY with valid JSON, no markdown, no code fences, no explanation.`;
 
